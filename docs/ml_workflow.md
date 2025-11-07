@@ -1,6 +1,6 @@
 # ML workflow
 
-## Every ML project follows these logical steps:
+## Every ML project follows these logical steps
 
 - Data Collection – gather relevant data (CSV, API, images, etc.)
 - Data Preprocessing – clean, normalize, and prepare it
