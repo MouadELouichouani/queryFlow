@@ -23,5 +23,17 @@ def TfIdf(path, question):
     print("Best ansewer: ",best_answer)
     print("Similarity Score: ",best_similarity_score)
 
+    if(best_similarity_score < 0.5):
+        print("I don't really know that yet!")
+        return {
+            "message" : "I don't really know that yet!",
+            "Similarity Score": best_similarity_score
+        }
+    return {
+        "Most similar question: ": best_question,
+        "Best answer": best_answer,
+        "Similarity Score: ": best_similarity_score
+    }
 
-TfIdf("/home/sofyan/Documents/tech-faq-chatbot/data/raw/software_questions.csv", "polymorphism")
+
+TfIdf("/home/sofyan/Documents/tech-faq-chatbot/data/raw/software_questions.csv", "who is messi")
