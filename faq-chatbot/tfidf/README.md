@@ -3,9 +3,6 @@
 This project implements a Question–Answer retrieval model using TF-IDF and Cosine Similarity.
 Given a user’s question, the model finds the most semantically similar question from a dataset and returns the corresponding best-matching answer.
 
-This project implements a Question–Answer retrieval model using TF-IDF (Term Frequency–Inverse Document Frequency) and Cosine Similarity.
-Given a user’s question, the model finds the most semantically similar question from a dataset and returns the corresponding best-matching answer.
-
 ## How it works
 
 ### Import necessary libraries such as `pandas`, `numpy`, `sklearn`

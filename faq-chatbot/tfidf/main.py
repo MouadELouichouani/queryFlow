@@ -19,6 +19,7 @@ def TfIdf(path, question):
     best_answer = dframe.iloc[best_index]["Answer"]
     best_similarity_score = similarities[0][best_index]  
 
+    print("Asked question: ", question)
     print("Most similar question: ", best_question)
     print("Best ansewer: ",best_answer)
     print("Similarity Score: ",best_similarity_score)
@@ -26,14 +27,16 @@ def TfIdf(path, question):
     if(best_similarity_score < 0.5):
         print("I don't really know that yet!")
         return {
+            "asked_question": question,
             "message" : "I don't really know that yet!",
             "Similarity Score": best_similarity_score
         }
     return {
+        "asked question": question,
         "Most similar question: ": best_question,
         "Best answer": best_answer,
         "Similarity Score: ": best_similarity_score
     }
 
 
-TfIdf("/home/sofyan/Documents/tech-faq-chatbot/data/raw/software_questions.csv", "who is messi")
+TfIdf("/home/sofyan/Documents/tech-faq-chatbot/data/raw/software_questions.csv", "polymorphism")
