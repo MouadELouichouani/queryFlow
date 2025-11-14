@@ -1,9 +1,8 @@
 from flask import Flask, request, jsonify
-import sys
+from models.qa_model import qa
 
 app = Flask(__name__)
-sys.path.insert(0, "../model")
-import main
+
 
 @app.route("/")
 def home():
@@ -17,10 +16,10 @@ def answer():
     if not question:
         return jsonify({"error": "No question provided"}), 400
 
-    if(len(question) > 100):
+    if len(question) > 100:
         return jsonify({"error": "Question too long"}), 400
 
-    response = main.MiniLM(question)
+    response = qa.MiniLM(question)
     return jsonify(response)
 
 
