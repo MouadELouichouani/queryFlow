@@ -1,7 +1,5 @@
 "use client"
 
-import * as React from "react"
-import { ChevronDown, Plus } from "lucide-react"
 
 import {
   DropdownMenu,
@@ -13,20 +11,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string
-    logo: React.ElementType
-    plan: string
-  }[]
-}) {
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
-
-  if (!activeTeam) {
-    return null
-  }
+export function TeamSwitcher() {
 
   return (
     <SidebarMenu>
@@ -34,11 +19,7 @@ export function TeamSwitcher({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton className="px-1.5 cursor-pointer py-6 w-full flex items-center">
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-5 items-center justify-center rounded-md">
-                <activeTeam.logo className="size-3" />
-              </div>
-              <span className="truncate font-semibold text-xl">{activeTeam.name}</span>
-              <ChevronDown className="opacity-50" />
+              <span className="truncate font-semibold text-xl">QueryFlow.AI</span>
             </SidebarMenuButton>
           </DropdownMenuTrigger>
         </DropdownMenu>

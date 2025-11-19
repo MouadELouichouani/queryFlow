@@ -2,8 +2,10 @@
 
 import {
   ArrowUpRight,
+  FolderPen,
   Link,
   MoreHorizontal,
+  Share,
   StarOff,
   Trash2,
 } from "lucide-react"
@@ -31,20 +33,18 @@ export function NavFavorites({
   favorites: {
     name: string
     url: string
-    emoji: string
   }[]
 }) {
   const { isMobile } = useSidebar()
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Favorites</SidebarGroupLabel>
+      <SidebarGroupLabel>Chats</SidebarGroupLabel>
       <SidebarMenu>
         {favorites.map((item) => (
-          <SidebarMenuItem key={item.name}>
+          <SidebarMenuItem key={item.name} className="h-8">
             <SidebarMenuButton asChild>
               <a href={item.url} title={item.name}>
-                <span>{item.emoji}</span>
                 <span>{item.name}</span>
               </a>
             </SidebarMenuButton>
@@ -60,23 +60,18 @@ export function NavFavorites({
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem>
-                  <StarOff className="text-muted-foreground" />
-                  <span>Remove from Favorites</span>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Share className="text-muted-foreground" />
+                  <span>Share</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <FolderPen className="text-muted-foreground" />
+                  <span>Rename</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link className="text-muted-foreground" />
-                  <span>Copy Link</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <ArrowUpRight className="text-muted-foreground" />
-                  <span>Open in New Tab</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Trash2 className="text-muted-foreground" />
-                  <span>Delete</span>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Trash2 className="text-red-500" />
+                  <span className="text-red-500">Delete</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
