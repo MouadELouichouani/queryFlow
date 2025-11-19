@@ -9,11 +9,8 @@ export default function ChatMessage({
 
   return (
     <div
-      className={`flex items-start gap-3 ${
-        isUser ? "flex-row-reverse" : ""
-      }`}
+      className={`flex items-start gap-3 ${isUser ? "flex-row-reverse" : ""}`}
     >
-
       <div
         className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold ${
           isUser ? "bg-blue-600" : "bg-green-600"

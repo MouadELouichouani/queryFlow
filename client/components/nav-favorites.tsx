@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   ArrowUpRight,
@@ -8,7 +8,7 @@ import {
   Share,
   StarOff,
   Trash2,
-} from "lucide-react"
+} from "lucide-react";
 
 import {
   DropdownMenu,
@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -25,17 +25,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 export function NavFavorites({
   favorites,
 }: {
   favorites: {
-    name: string
-    url: string
-  }[]
+    name: string;
+    url: string;
+  }[];
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -85,5 +85,5 @@ export function NavFavorites({
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }

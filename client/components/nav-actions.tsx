@@ -1,20 +1,14 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import {
-  Flag,
-  MoreHorizontal,
-  Share,
-  Star,
-  Trash,
-} from "lucide-react"
+import * as React from "react";
+import { Flag, MoreHorizontal, Share, Star, Trash } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 import {
   Sidebar,
   SidebarContent,
@@ -23,7 +17,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 const data = [
   [
@@ -35,15 +29,15 @@ const data = [
       label: "Delete",
       icon: Trash,
     },
-  ]
-]
+  ],
+];
 
 export function NavActions() {
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [isOpen, setIsOpen] = React.useState(false);
 
   React.useEffect(() => {
-    setIsOpen(true)
-  }, [])
+    setIsOpen(true);
+  }, []);
 
   return (
     <div className="flex items-center gap-2 text-sm">
@@ -76,7 +70,13 @@ export function NavActions() {
                     <SidebarMenu>
                       {group.map((item, index) => (
                         <SidebarMenuItem key={index}>
-                          <SidebarMenuButton className={item.label === "Delete"? "text-red-500 hover:text-red-500" :""}>
+                          <SidebarMenuButton
+                            className={
+                              item.label === "Delete"
+                                ? "text-red-500 hover:text-red-500"
+                                : ""
+                            }
+                          >
                             <item.icon /> <span>{item.label}</span>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -90,5 +90,5 @@ export function NavActions() {
         </PopoverContent>
       </Popover>
     </div>
-  )
+  );
 }

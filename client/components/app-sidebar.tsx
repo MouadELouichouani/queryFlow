@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   Contact,
   Home,
@@ -8,24 +8,24 @@ import {
   MessageCircleQuestion,
   MessageSquareShare,
   Search,
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavFavorites } from "@/components/nav-favorites"
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { TeamSwitcher } from "@/components/team-switcher"
+import { NavFavorites } from "@/components/nav-favorites";
+import { NavMain } from "@/components/nav-main";
+import { NavSecondary } from "@/components/nav-secondary";
+import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { NavUser } from "./nav-user"
+} from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { NavUser } from "./nav-user";
 
 const data = {
-   user: {
+  user: {
     name: "Soufian poker",
     email: "so006@gmail.com",
     avatar: "/gamboal.jpg",
@@ -110,12 +110,9 @@ const data = {
     {
       name: "Personal Finance & Investment Portfolio",
       url: "#",
-    }
+    },
   ],
-}
-
-
-
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -133,5 +130,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
