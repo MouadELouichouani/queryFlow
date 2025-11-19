@@ -4,8 +4,6 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import TypingIndicator from "./TypingIndicator";
 
-
-
 type Message = {
   role: "user" | "assistant";
   content: string;
@@ -22,10 +20,8 @@ export default function ChatContainer() {
   const sendMessage = async (text: string) => {
     if (!text.trim()) return;
 
-
     setMessages((prev) => [...prev, { role: "user", content: text }]);
     setIsTyping(true);
-
 
     setTimeout(() => {
       const reply =
@@ -58,7 +54,6 @@ export default function ChatContainer() {
       }, 20);
     }, 500);
   };
-
 
   useEffect(() => {
     containerRef.current?.scrollTo({
