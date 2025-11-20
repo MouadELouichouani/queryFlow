@@ -1,4 +1,3 @@
-from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -33,3 +32,6 @@ model.fit(x_train, y_train)
 def isTechOrNot(question):
     prediction = model.predict(vecotrizer.transform([question]))
     return prediction[0]  # this returns "Tech" OR "Non-Tech"
+
+
+isTechOrNot("hello how are you?")

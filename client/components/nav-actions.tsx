@@ -18,7 +18,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { ToggleMode } from "./toglle-mode";
+import { ModeToggle } from "./toggle-mode";
 
 const data = [
   [
@@ -46,7 +46,7 @@ export function NavActions() {
         Share
         <Share />
       </Button>
-      <ToggleMode />
+      <ModeToggle />
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
             <MoreHorizontal className="ml-2"/>
