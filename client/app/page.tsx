@@ -47,6 +47,10 @@ export default function Page() {
     }, 30);
   };
 
+
+
+
+  
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
