@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Flag, MoreHorizontal, Share, Star, Trash } from "lucide-react";
+import { Flag, MoreHorizontal, Share, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +18,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { ToggleMode } from "./toglle-mode";
 
 const data = [
   [
@@ -27,7 +28,7 @@ const data = [
     },
     {
       label: "Delete",
-      icon: Trash,
+      icon: Trash2,
     },
   ],
 ];
@@ -35,9 +36,6 @@ const data = [
 export function NavActions() {
   const [isOpen, setIsOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    setIsOpen(true);
-  }, []);
 
   return (
     <div className="flex items-center gap-2 text-sm">
@@ -48,15 +46,10 @@ export function NavActions() {
         Share
         <Share />
       </Button>
+      <ToggleMode />
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="data-[state=open]:bg-accent h-7 w-7"
-          >
-            <MoreHorizontal />
-          </Button>
+            <MoreHorizontal className="ml-2"/>
         </PopoverTrigger>
         <PopoverContent
           className="w-40 overflow-hidden rounded-lg p-0"

@@ -1,12 +1,9 @@
 "use client";
 
 import {
-  ArrowUpRight,
   FolderPen,
-  Link,
   MoreHorizontal,
   Share,
-  StarOff,
   Trash2,
 } from "lucide-react";
 
@@ -56,7 +53,7 @@ export function NavFavorites({
                 </SidebarMenuAction>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-56 rounded-lg"
+                className="w-46 rounded-lg"
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >

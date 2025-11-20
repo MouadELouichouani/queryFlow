@@ -3,9 +3,6 @@
 import {
   Bell,
   ChevronsUpDown,
-  CreditCard,
-  EllipsisVertical,
-  FlipVertical,
   LogOut,
   UserCircle,
 } from "lucide-react";
