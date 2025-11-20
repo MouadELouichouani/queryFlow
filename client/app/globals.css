@@ -2,7 +2,18 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+@layer utilities {
+      /* Chrome, Safari and Opera */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
 
+      /* IE and Edge */
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none; /* Firefox */
+      }
+    }
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
