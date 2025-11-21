@@ -128,7 +128,7 @@ export default function Page() {
               ))}
 
               {streamText && (
-                <div className="p-2 rounded-xl text-lg font-sans dark:text-white/60 text-lg text-black/60">
+                <div className="p-2 rounded-xl text-lg font-sans dark:text-white/60 text-black/60">
                   {streamText}
                   <span className="animate-pulse text-lg">▌</span>
                 </div>

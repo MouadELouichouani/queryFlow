@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nexus.AI",
+  title: "queryFlow.AI",
   description: "Your AI chatbot for tech questions",
 };
 

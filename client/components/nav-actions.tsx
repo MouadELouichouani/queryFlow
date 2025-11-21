@@ -19,6 +19,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { ModeToggle } from "./toggle-mode";
+import Login from "./o-auth-button";
 
 const data = [
   [
@@ -38,15 +39,13 @@ export function NavActions() {
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <div className="text-muted-foreground hidden font-medium md:inline-block">
-        Developed to assist you!
-      </div>
+      <Login />
       <Button variant="ghost" className="rounded-full cursor-pointer">
         Share
         <Share />
       </Button>
       <ModeToggle />
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      {/* <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <MoreHorizontal className="ml-2" />
         </PopoverTrigger>
@@ -80,7 +79,7 @@ export function NavActions() {
             </SidebarContent>
           </Sidebar>
         </PopoverContent>
-      </Popover>
+      </Popover> */}
     </div>
   );
 }
