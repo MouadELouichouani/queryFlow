@@ -1,11 +1,10 @@
 import requests
-from flask import request, jsonify
+from flask import request, jsonify, make_response
 from config.db import get_db
 from config.google_oauth import *
 from utils.jwt_utils import create_token
-
-db = get_db()
-users = db["users"]
+from utils.jwt_utils import verify_token
+from bson import ObjectId
 
 
 def google_login():
@@ -83,3 +82,37 @@ def google_callback():
         ),
         200,
     )
+
+
+def get_current_user():
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    try:
+        user_id_str = verify_token(token)
+        user_id = ObjectId(user_id_str)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 401
+
+    user = users.find_one({"_id": user_id})
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify(
+        {
+            "user_id": str(user["_id"]),
+            "email": user["email"],
+            "name": user.get("name"),
+            "picture": user.get("picture"),
+        }
+    )
+
+
+def logout():
+    response = make_response(jsonify({"message": "Logged out successfully"}))
+    response.set_cookie("token", "", expires=0, path="/")
+    return response

@@ -1,85 +1,55 @@
 "use client";
 
 import * as React from "react";
-import { Flag, MoreHorizontal, Share, Trash2 } from "lucide-react";
+import { Share } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
 import { ModeToggle } from "./toggle-mode";
 import Login from "./o-auth-button";
-
-const data = [
-  [
-    {
-      label: "Report",
-      icon: Flag,
-    },
-    {
-      label: "Delete",
-      icon: Trash2,
-    },
-  ],
-];
+import { getCurrentUser } from "@/services/auth";
+import { User } from "@/types/user";
 
 export function NavActions() {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [user, setUser] = React.useState<User | null>(null);
+  const [loading, setLoading] = React.useState<boolean>(true);
 
+  React.useEffect(() => {
+    const fetchUser = async () => {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("token="))
+        ?.split("=")[1];
+
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+      try {
+        setLoading(true);
+        const response = await getCurrentUser(token);
+        setUser(response.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  if (!user && loading) return null;
   return (
     <div className="flex items-center gap-2 text-sm">
-      <Login />
-      <Button variant="ghost" className="rounded-full cursor-pointer">
-        Share
-        <Share />
-      </Button>
+      {user && (
+        <Button variant="ghost" className="rounded-full cursor-pointer">
+          Share
+          <Share />
+        </Button>
+      )}
+      {!user && !loading && <Login />}
       <ModeToggle />
-      {/* <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <MoreHorizontal className="ml-2" />
-        </PopoverTrigger>
-        <PopoverContent
-          className="w-40 overflow-hidden rounded-lg p-0"
-          align="end"
-        >
-          <Sidebar collapsible="none" className="bg-transparent">
-            <SidebarContent>
-              {data.map((group, index) => (
-                <SidebarGroup key={index} className="border-b last:border-none">
-                  <SidebarGroupContent className="gap-0">
-                    <SidebarMenu>
-                      {group.map((item, index) => (
-                        <SidebarMenuItem key={index}>
-                          <SidebarMenuButton
-                            className={
-                              item.label === "Delete"
-                                ? "text-red-500 hover:text-red-500"
-                                : ""
-                            }
-                          >
-                            <item.icon /> <span>{item.label}</span>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              ))}
-            </SidebarContent>
-          </Sidebar>
-        </PopoverContent>
-      </Popover> */}
     </div>
   );
 }

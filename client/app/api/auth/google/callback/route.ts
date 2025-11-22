@@ -1,18 +1,16 @@
+import { api } from "@/config/api";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
 
-  const res = await fetch(
-    `http://localhost:5000/auth/google/callback?code=${code}`,
-  );
-
-  const data = await res.json();
+  const response = await api.get(`/auth/google/callback?code=${code}`);
+  const data = response.data;
 
   // Save token in cookie
-  const response = NextResponse.redirect("http://localhost:3000/dashboard");
-  response.cookies.set("token", data.token, { path: "/" });
+  const response2 = NextResponse.redirect(process.env.NEXT_APP_URL!);
+  response2.cookies.set("token", data.token, { path: "/" });
 
-  return response;
+  return response2;
 }
