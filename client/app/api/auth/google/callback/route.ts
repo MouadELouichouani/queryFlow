@@ -5,7 +5,7 @@ export async function GET(req: NextRequest) {
   const code = url.searchParams.get("code");
 
   const res = await fetch(
-    `http://localhost:5000/auth/google/callback?code=${code}`
+    `http://localhost:5000/auth/google/callback?code=${code}`,
   );
 
   const data = await res.json();

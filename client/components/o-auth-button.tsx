@@ -29,15 +29,20 @@ export default function Login() {
         variant="outline"
         className="cursor-pointer text-sm  w-[200px] flex items-center gap-2"
         onClick={oAuthGoogle}
-        disabled={loading} 
+        disabled={loading}
       >
         {loading ? (
           <div className="flex gap-2 justify-center">
-            <LoaderIcon className="animate-spin"/> <span>Loading...</span>
+            <LoaderIcon className="animate-spin" /> <span>Loading...</span>
           </div>
         ) : (
           <>
-            <Image src={"/icons/google.svg"} width={25} height={25} alt="google icon" />
+            <Image
+              src={"/icons/google.svg"}
+              width={25}
+              height={25}
+              alt="google icon"
+            />
             <span>Sign in with Google</span>
           </>
         )}

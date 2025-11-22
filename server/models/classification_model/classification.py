@@ -32,5 +32,3 @@ model.fit(x_train, y_train)
 def isTechOrNot(question):
     prediction = model.predict(vecotrizer.transform([question]))
     return prediction[0]  # this returns "Tech" OR "Non-Tech"
-
-
