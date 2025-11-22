@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./toggle-mode";
 import Login from "./o-auth-button";
 import { getCurrentUser } from "@/services/auth";
+import { User } from "@/types/user";
 
 export function NavActions() {
-  const [user, setUser] = React.useState<any>(null);
+  const [user, setUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
 
   React.useEffect(() => {

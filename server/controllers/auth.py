@@ -6,6 +6,7 @@ from utils.jwt_utils import create_token
 from utils.jwt_utils import verify_token
 from bson import ObjectId
 
+
 def google_login():
     auth_url = GOOGLE_OAUTH_URL.format(
         client_id=GOOGLE_CLIENT_ID, redirect_uri=GOOGLE_REDIRECT_URI
@@ -82,6 +83,7 @@ def google_callback():
         200,
     )
 
+
 def get_current_user():
     auth_header = request.headers.get("Authorization")
 
@@ -100,12 +102,14 @@ def get_current_user():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    return jsonify({
-        "user_id": str(user["_id"]),
-        "email": user["email"],
-        "name": user.get("name"),
-        "picture": user.get("picture")
-    })
+    return jsonify(
+        {
+            "user_id": str(user["_id"]),
+            "email": user["email"],
+            "name": user.get("name"),
+            "picture": user.get("picture"),
+        }
+    )
 
 
 def logout():
