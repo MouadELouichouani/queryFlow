@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const code = url.searchParams.get("code");
 
   const response = await api.get(`/auth/google/callback?code=${code}`);
-  const data = response.data;
+  const data = response.data;  
 
   // Save token in cookie
   const response2 = NextResponse.redirect(process.env.NEXT_APP_URL!);

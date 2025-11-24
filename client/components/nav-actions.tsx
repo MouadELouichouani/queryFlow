@@ -13,6 +13,7 @@ export function NavActions() {
   const [user, setUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState<boolean>(true);
 
+  
   React.useEffect(() => {
     const fetchUser = async () => {
       const token = document.cookie
@@ -20,7 +21,7 @@ export function NavActions() {
         .find((row) => row.startsWith("token="))
         ?.split("=")[1];
 
-      if (!token) {
+      if (!token) {        
         setUser(null);
         setLoading(false);
         return;

@@ -14,7 +14,7 @@ export const getCurrentUser = async (token: string) => {
       Authorization: `Bearer ${token}`,
     },
   });
-  console.log(response);
+  console.log('hhhhhh');
   return response;
 };
 
