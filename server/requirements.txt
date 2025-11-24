@@ -63,7 +63,7 @@ scipy==1.16.3
 sentence-transformers==5.1.2
 setuptools==80.9.0
 six==1.17.0
-smmap==5.0.1
+smmap==5.0.2
 snowballstemmer==2.2.0
 Sphinx==8.2.3
 sphinxcontrib-applehelp==2.0.0
