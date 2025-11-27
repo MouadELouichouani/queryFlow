@@ -10,7 +10,6 @@ import {
   Search,
 } from "lucide-react";
 
-import { NavFavorites } from "@/components/nav-favorites";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { TeamSwitcher } from "@/components/team-switcher";
@@ -22,6 +21,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { NavUser } from "./nav-user";
+import { Histories } from "./histories";
 
 const data = {
   user: {
@@ -32,7 +32,7 @@ const data = {
   navMain: [
     {
       title: "New chat",
-      url: "#",
+      url: "/",
       icon: MessageCirclePlus,
       isActive: true,
     },
@@ -64,53 +64,6 @@ const data = {
       icon: MessageCircleQuestion,
     },
   ],
-  favorites: [
-    {
-      name: "Project Management & Task Tracking",
-      url: "#",
-    },
-    {
-      name: "JWT/local storage token handling.",
-      url: "#",
-    },
-    {
-      name: "View unanswered questions collected by backend.",
-      url: "#",
-    },
-    {
-      name: "View analytics dashboards (charts, counts).",
-      url: "#",
-    },
-
-    {
-      name: "Family Recipe Collection & Meal Planning",
-      url: "#",
-    },
-    {
-      name: "Fitness Tracker & Workout Routines",
-      url: "#",
-    },
-    {
-      name: "Book Notes & Reading List",
-      url: "#",
-    },
-    {
-      name: "Sustainable Gardening Tips & Plant Care",
-      url: "#",
-    },
-    {
-      name: "Language Learning Progress & Resources",
-      url: "#",
-    },
-    {
-      name: "Home Renovation Ideas & Budget Tracker",
-      url: "#",
-    },
-    {
-      name: "Personal Finance & Investment Portfolio",
-      url: "#",
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -121,7 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarHeader>
       <SidebarContent>
-        <NavFavorites favorites={data.favorites} />
+        <Histories />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

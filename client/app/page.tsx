@@ -23,107 +23,202 @@ import {
 } from "@/components/ui/sidebar";
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import { ArrowUp, LoaderIcon } from "lucide-react";
-import { useState, useEffect, useRef, KeyboardEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef, KeyboardEvent, JSX } from "react";
+import { useParams } from "next/navigation";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
 };
 
-export default function Page({ historyUrl }: { historyUrl?: string | '' }) {
+export default function Page() {
+  const params = useParams();
+
+  const routeHistoryUrl = params?.url as string | null;
+
+  const [chatUrl, setChatUrl] = useState<string | null>(routeHistoryUrl);
+
   const [loading, setLoading] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [streamText, setStreamText] = useState<string>("");
   const chatRef = useRef<HTMLDivElement | null>(null);
-  const [chatUrl, setChatUrl] = useState<string | null>(null);
-  const router = useRouter();
-  const params = useSearchParams();
-  const initialHistoryUrl = params.historyUrl;
   const [historyId, setHistoryId] = useState<string | null>(null);
 
+  function formatText(text: string) {
+    const regex = /(\*\*([^\*]+)\*\*)|'([^']+)'/g;
+    const parts: (string | JSX.Element)[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
 
+    while ((match = regex.exec(text)) !== null) {
+      const start = match.index;
+      const fullMatch = match[0];
+      const insideStars = match[2];
+      const insideQuotes = match[3];
+
+      if (start > lastIndex) {
+        parts.push(text.slice(lastIndex, start));
+      }
+
+      if (insideStars) {
+        parts.push(
+          <strong key={start} className="dark:text-white/90 text-black/90">
+            {insideStars.trim()}
+          </strong>,
+        );
+      } else if (insideQuotes) {
+        const cleaned = insideQuotes.trim().replace(/^[^\w]+|[^\w]+$/g, "");
+        if (cleaned.length >= 5 && cleaned.length <= 30) {
+          parts.push(
+            <strong key={start} className="text-black dark:text-white">
+              {cleaned}
+            </strong>,
+          );
+        } else {
+          parts.push(fullMatch);
+        }
+      }
+
+      lastIndex = start + fullMatch.length;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+
+    return parts;
+  }
 
   const send = async () => {
-  if (!input.trim()) return;
+    if (!input.trim()) return;
 
-  setMessages((prev) => [...prev, { role: "user", content: input }]);
-    
-  const userMessage = input;
-  setInput("");
-  setLoading(true);
+    setMessages((prev) => [...prev, { role: "user", content: input }]);
 
-  try {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1];
+    const userMessage = input;
+    setInput("");
+    setLoading(true);
 
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+    try {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("token="))
+        ?.split("=")[1];
 
-    const params = new URLSearchParams({
-      question: userMessage,
-    });
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
-    params.append("history_url", historyUrl);
+      const queryParams = new URLSearchParams({
+        question: userMessage,
+      });
 
-    const res = await fetch(`http://localhost:5000/api/ask?${params}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      const activeUrl = chatUrl || routeHistoryUrl;
 
-    const data = await res.json();
+      if (activeUrl) {
+        queryParams.append("history_url", activeUrl);
+      }
 
-    if (data.history_id && !historyId) {
-      setHistoryId(data.history_id);
-      setChatUrl(data.url ?? null);
-
-      router.replace(`/chat/${data.url}`);
-    }
-
-
-    if (data.response) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.response },
-      ]);
-    }
-  } catch (err) {
-    console.error("Error:", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
-
-  useEffect(() => {
-    if (!initialHistoryUrl) return;
-
-    const loadHistory = async () => {
-      const token = document.cookie.split("; ").find(row => row.startsWith("token="))?.split("=")[1];
-      if (!token) return;
-
-      const res = await fetch(`http://localhost:5000/api/history/${initialHistoryUrl}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch(`http://localhost:5000/api/ask?${queryParams}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
+      const assistantResponse = data.response || "";
+
       if (data.history_id) {
-        setHistoryId(data.history_id);
-        setMessages(data.messages.map((m: any) => ({ role: m.role, content: m.content })));
+        if (!historyId) setHistoryId(data.history_id);
+
+        if (data.url && data.url !== chatUrl) {
+          setChatUrl(data.url);
+          window.history.replaceState(null, "", `/chat/${data.url}`);
+        }
+      }
+
+      setStreamText("");
+      let fullText = "";
+      let i = 0;
+
+      const interval = setInterval(() => {
+        if (i < assistantResponse.length) {
+          fullText += assistantResponse.charAt(i);
+          setStreamText(fullText);
+          i++;
+        } else {
+          clearInterval(interval);
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: assistantResponse },
+          ]);
+          setStreamText("");
+          setLoading(false);
+        }
+      }, 20);
+    } catch (err) {
+      console.error("Error:", err);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!routeHistoryUrl) return;
+
+    setChatUrl(routeHistoryUrl);
+
+    const loadHistory = async () => {
+      setLoading(true);
+      try {
+        const token = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("token="))
+          ?.split("=")[1];
+
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(
+          `http://localhost:5000/api/history/${routeHistoryUrl}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        );
+
+        if (res.status === 404) {
+          setLoading(false);
+          return;
+        }
+
+        if (!res.ok) {
+          console.error("Failed to load history with status:", res.status);
+          setLoading(false);
+          return;
+        }
+
+        const data = await res.json();
+
+        if (data.history_id) {
+          setHistoryId(data.history_id);
+          setChatUrl(data.url);
+
+          if (Array.isArray(data.messages)) {
+            setMessages(data.messages);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading history:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadHistory();
-  }, [initialHistoryUrl]);
-
+  }, [routeHistoryUrl]);
 
   useEffect(() => {
     if (chatRef.current) {
@@ -165,12 +260,23 @@ export default function Page({ historyUrl }: { historyUrl?: string | '' }) {
         </header>
 
         <div
-          className={`flex flex-col w-full md:w-[80%] lg:w-[60%] mx-auto px-4 py-6 ${messages.length === 0 ? "mt-[10%]" : ""}`}
+          className={`flex flex-col w-full md:w-[80%] lg:w-[60%] mx-auto px-4 py-6 ${
+            messages.length === 0 ? "mt-[10%]" : ""
+          }`}
         >
           <div
-            className={`flex flex-col flex-1 ${messages.length === 0 ? "justify-center" : "justify-start"} gap-4`}
+            className={`flex flex-col flex-1 ${
+              messages.length === 0 ? "justify-center" : "justify-start"
+            } gap-4`}
           >
-            {messages.length === 0 && (
+            {loading && messages.length === 0 && (
+              <div className="text-center text-lg text-white/50">
+                <LoaderIcon className="animate-spin inline-block mr-2" />
+                Loading conversation...
+              </div>
+            )}
+
+            {!loading && messages.length === 0 && (
               <h1 className="text-center lg:text-3xl text-2xl font-semibold">
                 Hello, how can I help you?
               </h1>
@@ -185,17 +291,17 @@ export default function Page({ historyUrl }: { historyUrl?: string | '' }) {
                   key={index}
                   className={`p-2 rounded-xl ${
                     msg.role === "user"
-                      ? "ml-auto max-w-[80%] bg-gray-100/90 dark:bg-gray-100/5 text-md px-4"
-                      : "font-sans dark:text-white/60 text-lg text-black/60"
+                      ? "ml-auto max-w-[80%] bg-gray-100/90 dark:bg-gray-100/5 text-lg px-4"
+                      : "font-sans dark:text-white/70 text-xl text-black/70"
                   }`}
                 >
-                  {msg.content}
+                  {formatText(msg.content)}
                 </div>
               ))}
 
               {streamText && (
-                <div className="p-2 rounded-xl text-lg font-sans dark:text-white/60 text-black/60">
-                  {streamText}
+                <div className="p-2 rounded-xl text-xl font-sans dark:text-white/70 text-black/70">
+                  {formatText(streamText)}
                   <span className="animate-pulse text-lg">▌</span>
                 </div>
               )}
@@ -205,9 +311,10 @@ export default function Page({ historyUrl }: { historyUrl?: string | '' }) {
           <div className="mt-2">
             <InputGroup>
               <InputGroupTextarea
+                className="text-xl font-semibold"
                 placeholder="Ask anything..."
                 value={input}
-                readOnly={loading}
+                readOnly={loading || !!streamText}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKey}
                 rows={Math.min(6, Math.max(1, input.split("\n").length))}
@@ -221,9 +328,9 @@ export default function Page({ historyUrl }: { historyUrl?: string | '' }) {
                   className="rounded-full cursor-pointer"
                   size="icon-sm"
                   onClick={send}
-                  disabled={loading}
+                  disabled={loading || !!streamText}
                 >
-                  {loading ? (
+                  {loading || streamText ? (
                     <LoaderIcon className="animate-spin" />
                   ) : (
                     <ArrowUp />
