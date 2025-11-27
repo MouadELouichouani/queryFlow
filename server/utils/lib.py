@@ -87,3 +87,10 @@ def getResponse(question):
 
     except Exception as e:
         print(f"An error occured : {e}")
+
+
+import uuid
+
+
+def generate_url():
+    return "chat_" + uuid.uuid4().hex[:10]
