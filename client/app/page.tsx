@@ -24,40 +24,106 @@ import {
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import { ArrowUp, LoaderIcon } from "lucide-react";
 import { useState, useEffect, useRef, KeyboardEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
 };
 
-export default function Page() {
+export default function Page({ historyUrl }: { historyUrl?: string | '' }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [input, setInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [streamText, setStreamText] = useState<string>("");
   const chatRef = useRef<HTMLDivElement | null>(null);
+  const [chatUrl, setChatUrl] = useState<string | null>(null);
+  const router = useRouter();
+  const params = useSearchParams();
+  const initialHistoryUrl = params.historyUrl;
+  const [historyId, setHistoryId] = useState<string | null>(null);
 
-  const send = () => {
-    if (!input.trim()) return;
 
-    setMessages((prev) => [...prev, { role: "user", content: input }]);
-    setInput("");
-    setLoading(true);
 
-    const reply =
-      "Hello! This is a streaming AI response demo. How can I help? Hello! This is a streaming AI response demo. How can I help?";
-    let i = 0;
-    const interval = setInterval(() => {
-      setStreamText(reply.slice(0, i));
-      i++;
-      if (i > reply.length) {
-        clearInterval(interval);
-        setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
-        setStreamText("");
-        setLoading(false);
+  const send = async () => {
+  if (!input.trim()) return;
+
+  setMessages((prev) => [...prev, { role: "user", content: input }]);
+    
+  const userMessage = input;
+  setInput("");
+  setLoading(true);
+
+  try {
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="))
+      ?.split("=")[1];
+
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    const params = new URLSearchParams({
+      question: userMessage,
+    });
+
+    params.append("history_url", historyUrl);
+
+    const res = await fetch(`http://localhost:5000/api/ask?${params}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (data.history_id && !historyId) {
+      setHistoryId(data.history_id);
+      setChatUrl(data.url ?? null);
+
+      router.replace(`/chat/${data.url}`);
+    }
+
+
+    if (data.response) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: data.response },
+      ]);
+    }
+  } catch (err) {
+    console.error("Error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+  useEffect(() => {
+    if (!initialHistoryUrl) return;
+
+    const loadHistory = async () => {
+      const token = document.cookie.split("; ").find(row => row.startsWith("token="))?.split("=")[1];
+      if (!token) return;
+
+      const res = await fetch(`http://localhost:5000/api/history/${initialHistoryUrl}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (data.history_id) {
+        setHistoryId(data.history_id);
+        setMessages(data.messages.map((m: any) => ({ role: m.role, content: m.content })));
       }
-    }, 30);
-  };
+    };
+
+    loadHistory();
+  }, [initialHistoryUrl]);
+
 
   useEffect(() => {
     if (chatRef.current) {
