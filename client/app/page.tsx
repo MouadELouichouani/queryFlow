@@ -25,6 +25,8 @@ import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
 import { ArrowUp, LoaderIcon } from "lucide-react";
 import { useState, useEffect, useRef, KeyboardEvent, JSX } from "react";
 import { useParams } from "next/navigation";
+import { ask } from "@/services/ask";
+import { getQueriesByHistory } from "@/services/history";
 
 type Message = {
   role: "user" | "assistant";
@@ -120,14 +122,9 @@ export default function Page() {
         queryParams.append("history_url", activeUrl);
       }
 
-      const res = await fetch(`http://localhost:5000/api/ask?${queryParams}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await ask(token, queryParams);
 
-      const data = await res.json();
+      const data = response.data;
       const assistantResponse = data.response || "";
 
       if (data.history_id) {
@@ -182,25 +179,20 @@ export default function Page() {
           return;
         }
 
-        const res = await fetch(
-          `http://localhost:5000/api/history/${routeHistoryUrl}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
+        const response = await getQueriesByHistory(token, routeHistoryUrl);
 
-        if (res.status === 404) {
+        if (response.status === 404) {
           setLoading(false);
           return;
         }
 
-        if (!res.ok) {
-          console.error("Failed to load history with status:", res.status);
+        if (response.status !== 200) {
+          console.error("Failed to load history with status");
           setLoading(false);
           return;
         }
 
-        const data = await res.json();
+        const data = await response.data;
 
         if (data.history_id) {
           setHistoryId(data.history_id);

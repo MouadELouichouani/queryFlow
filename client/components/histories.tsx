@@ -1,6 +1,6 @@
 "use client";
 
-import { FolderPen, MoreHorizontal, Share, Trash2 } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { useState, useEffect } from "react";
 
 import {
@@ -20,11 +20,17 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { getHistories } from "@/services/history";
+import { DeleteHistory } from "./delete-history";
+import { RenameHistory } from "./rename-history";
+import { ChangeVisibility } from "./change-visibility";
+import { ChatLink } from "./chat-link";
 
 type HistoryItem = {
-  id: number;
+  _id: string;
   url: string;
   title: string;
+  visibility: "public" | "private";
 };
 
 export function Histories() {
@@ -32,6 +38,8 @@ export function Histories() {
 
   const [histories, setHistories] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toPublic, setToPublic] = useState(false);
+  const [url, setUrl] = useState("");
 
   useEffect(() => {
     const fetchHistories = async () => {
@@ -48,24 +56,16 @@ export function Histories() {
           return;
         }
 
-        const res = await fetch(`http://localhost:5000/api/history/all`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await getHistories(token);
 
-        if (!res.ok) {
-          throw new Error(`Failed to fetch histories: ${res.statusText}`);
+        if (response.status !== 200) {
+          throw new Error(`Failed to fetch histories`);
         }
 
-        const data = await res.json();
-
-        if (data.histories && Array.isArray(data.histories)) {
-          setHistories(data.histories);
+        if (response.data.histories && Array.isArray(response.data.histories)) {
+          setHistories(response.data.histories);
         } else {
-          setHistories(data);
+          setHistories(response.data);
         }
       } catch (error) {
         console.error("Error fetching chat histories:", error);
@@ -76,6 +76,25 @@ export function Histories() {
 
     fetchHistories();
   }, []);
+
+  const handleRename = (id: string, newTitle: string) => {
+    setHistories((prev) =>
+      prev.map((h) => (h._id === id ? { ...h, title: newTitle } : h)),
+    );
+  };
+
+  const handleDelete = (id: string) => {
+    setHistories((prev) => prev.filter((h) => h._id !== id));
+  };
+
+  const handleChangeVisibility = (
+    id: string,
+    newVisibility: "public" | "private",
+  ) => {
+    setHistories((prev) =>
+      prev.map((h) => (h._id === id ? { ...h, visibility: newVisibility } : h)),
+    );
+  };
 
   if (loading) {
     return (
@@ -130,23 +149,42 @@ export function Histories() {
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem className="cursor-pointer">
-                  <Share className="text-muted-foreground" />
-                  <span>Share</span>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <ChangeVisibility
+                    id={item._id}
+                    hisVisibility={item.visibility}
+                    setUrl={setUrl}
+                    setToPublic={setToPublic}
+                    onChangeVis={(newVisibility: "private" | "public") =>
+                      handleChangeVisibility(item._id, newVisibility)
+                    }
+                  />
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <FolderPen className="text-muted-foreground" />
-                  <span>Rename</span>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <RenameHistory
+                    id={item._id}
+                    title={item.title}
+                    onRename={handleRename}
+                  />
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
-                  <Trash2 className="text-red-500" />
-                  <span className="text-red-500">Delete</span>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onSelect={(e) => e.preventDefault()}
+                >
+                  <DeleteHistory id={item._id} onDeleted={handleDelete} />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
+        {toPublic && <ChatLink url={url} />}
         <SidebarMenuItem>
           <SidebarMenuButton className="text-sidebar-foreground/70">
             <MoreHorizontal />

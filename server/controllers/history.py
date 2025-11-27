@@ -6,6 +6,7 @@ from bson import ObjectId
 from datetime import datetime
 from flask import request, jsonify
 from bson.objectid import ObjectId
+from datetime import datetime
 
 db = get_db()
 
@@ -25,21 +26,11 @@ def create_history(user_id, title, visibility="private"):
     return str(result.inserted_id), doc["url"]
 
 
-from flask import request, jsonify
-from bson.objectid import ObjectId
-from datetime import (
-    datetime,
-)  # Import datetime if you use it for sorting, even if it's not a direct field
-
-
-# Function to handle complex serialization (useful for nested objects)
 def serialize_mongo_doc(doc):
-    """Converts MongoDB document types (ObjectId, datetime) to serializable strings."""
     if isinstance(doc, ObjectId):
         return str(doc)
     if isinstance(doc, datetime):
         return doc.isoformat()
-    # If it's a list or dict, recurse
     if isinstance(doc, dict):
         return {k: serialize_mongo_doc(v) for k, v in doc.items()}
     if isinstance(doc, list):
@@ -63,14 +54,11 @@ def get_user_histories():
 
         user_id = ObjectId(user_id_str)
 
-    except Exception:  # Keeping general Exception for token/ID parsing errors
+    except Exception:
         return jsonify({"error": "Invalid token or user ID format"}), 401
 
-    # Fetch Histories
-    # Use _id for sorting (newest first) since 'timestamp' is absent
-    histories = list(db.history.find({"user_id": user_id}).sort("_id", -1))
+    histories = list(db.history.find({"user_id": user_id}).sort("last_updated", -1))
 
-    # Apply comprehensive serialization to all fields
     serialized_histories = []
     for h in histories:
         serialized_histories.append(serialize_mongo_doc(h))
@@ -79,14 +67,13 @@ def get_user_histories():
 
 
 def get_history_by_url(url):
-    # 1. Verify Token
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         return jsonify({"error": "Missing token"}), 401
 
     token = auth_header.split(" ")[1]
     try:
-        user_id = verify_token(token)  # helper returns payload (string)
+        user_id = verify_token(token)
     except:
         return jsonify({"error": "Invalid token"}), 401
 
@@ -95,21 +82,106 @@ def get_history_by_url(url):
     if not history:
         return jsonify({"error": "Not found"}), 404
 
-    # 3. Find the Related Queries (Messages)
-    # We search the 'queries' collection where history_id matches this history's ID
-    # Sort by _id to ensure they are in chronological order
     queries_cursor = db.queries.find({"history_id": history["_id"]}).sort("_id", 1)
 
     messages = []
 
-    # 4. Reconstruct the Conversation
     for q in queries_cursor:
-        # Append User Question
         messages.append({"role": "user", "content": q.get("question", "")})
-        # Append AI Answer
         messages.append({"role": "assistant", "content": q.get("answer", "")})
 
-    # 5. Return the Data
     return jsonify(
         {"history_id": str(history["_id"]), "url": history["url"], "messages": messages}
     )
+
+
+def update_visibility(id):
+    try:
+        data = request.get_json()
+        visibility = data.get("visibility")
+
+        if visibility not in ["public", "private"]:
+            return jsonify({"error": "visibility must be 'public' or 'private'"}), 400
+
+        result = db.history.update_one(
+            {"_id": ObjectId(id)}, {"$set": {"visibility": visibility}}
+        )
+
+        if result.matched_count == 0:
+            return jsonify({"error": "History not found"}), 404
+
+        # Fetch the updated document to return URL
+        history = db.history.find_one({"_id": ObjectId(id)}, {"url": 1})
+        url = history.get("url") if history else None
+
+        return (
+            jsonify(
+                {
+                    "message": "Visibility updated successfully",
+                    "history_id": id,
+                    "url": url,
+                    "visibility": visibility,
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def update_title(id):
+    try:
+        data = request.get_json()
+        title = data.get("title")
+
+        if not title:
+            return jsonify({"error": "title is required"}), 400
+
+        result = db.history.update_one(
+            {"_id": ObjectId(id)}, {"$set": {"title": title}}
+        )
+
+        if result.matched_count == 0:
+            return jsonify({"error": "History not found"}), 404
+
+        return (
+            jsonify(
+                {
+                    "message": "Title updated successfully",
+                    "history_id": id,
+                    "title": title,
+                }
+            ),
+            200,
+        )
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+def delete_history(id):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing token"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    try:
+        user_id = ObjectId(verify_token(token))
+    except:
+        return jsonify({"error": "Invalid token"}), 401
+
+    try:
+        history_id = ObjectId(id)
+    except:
+        return jsonify({"error": "Invalid history_id"}), 400
+
+    history = db.history.find_one({"_id": history_id, "user_id": user_id})
+    if not history:
+        return jsonify({"error": "History not found or unauthorized"}), 404
+
+    db.history.delete_one({"_id": history_id})
+    db.queries.delete_many({"history_id": history_id})
+
+    return jsonify({"message": "History deleted successfully"})
