@@ -24,34 +24,6 @@ import { NavUser } from "./nav-user";
 import { Histories } from "./histories";
 
 const data = {
-  user: {
-    name: "Soufian poker",
-    email: "so006@gmail.com",
-    avatar: "/gamboal.jpg",
-  },
-  navMain: [
-    {
-      title: "New chat",
-      url: "/",
-      icon: MessageCirclePlus,
-      isActive: true,
-    },
-    {
-      title: "Search chats",
-      url: "#",
-      icon: Search,
-    },
-    {
-      title: "Home",
-      url: "#",
-      icon: Home,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: MessageSquareShare,
-    },
-  ],
   navSecondary: [
     {
       title: "Contact",
@@ -71,7 +43,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
         <TeamSwitcher />
-        <NavMain items={data.navMain} />
+        <NavMain />
       </SidebarHeader>
       <SidebarContent>
         <Histories />

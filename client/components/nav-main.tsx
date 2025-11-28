@@ -1,35 +1,29 @@
 "use client";
 
-import { type LucideIcon } from "lucide-react";
+import { Home, Newspaper, SquarePlay, SquarePlus, type LucideIcon } from "lucide-react";
 
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { FeedbackDialog } from "./feedback-dialog";
+import Link from "next/link";
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string;
-    url: string;
-    icon: LucideIcon;
-    isActive?: boolean;
-  }[];
-}) {
+export function NavMain() {
   return (
-    <SidebarMenu>
-      {items.map((item) => (
-        <SidebarMenuItem key={item.title}>
-          <SidebarMenuButton asChild isActive={item.isActive}>
-            <a href={item.url}>
-              <item.icon />
-              <span>{item.title}</span>
-            </a>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
+    <SidebarMenu className="flex flex-col gap-3 ml-2">
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild>
+          <FeedbackDialog />
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+      <SidebarMenuItem>
+          <Link href={'/'} className="flex gap-2 items-center">
+            <SquarePlus size={15}/>
+            <span>New chat</span>
+          </Link>
+      </SidebarMenuItem>
     </SidebarMenu>
   );
 }

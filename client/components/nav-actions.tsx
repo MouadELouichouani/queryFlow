@@ -1,9 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Share } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { ModeToggle } from "./toggle-mode";
 import Login from "./o-auth-button";
 import { getCurrentUser } from "@/services/auth";
@@ -43,10 +41,7 @@ export function NavActions() {
   return (
     <div className="flex items-center gap-2 text-sm">
       {user && (
-        <Button variant="ghost" className="rounded-full cursor-pointer">
-          Share
-          <Share />
-        </Button>
+        <p>Logged in as <strong>{user.name}</strong></p>
       )}
       {!user && !loading && <Login />}
       <ModeToggle />
