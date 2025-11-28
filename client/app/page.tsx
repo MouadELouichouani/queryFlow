@@ -48,10 +48,10 @@ export default function Page() {
   const [streamText, setStreamText] = useState<string>("");
   const chatRef = useRef<HTMLDivElement | null>(null);
   const [historyId, setHistoryId] = useState<string | null>(null);
-  const [loadingRes,setLoadingRes] = useState(false)
-  const [loadUser,setLoadUser] = useState(true)
+  const [loadingRes, setLoadingRes] = useState(false);
+  const [loadUser, setLoadUser] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-  
+
   function formatText(text: string) {
     if (typeof text !== "string") return text;
 
@@ -84,17 +84,16 @@ export default function Page() {
         parts.push(
           <strong key={start} className="dark:text-white/90 text-black/90">
             {bold.trim()}
-          </strong>
+          </strong>,
         );
-      }
-      else if (insideQuotes) {
+      } else if (insideQuotes) {
         const short = insideQuotes.trim();
 
         if (short.length >= 5 && short.length <= 30) {
           parts.push(
             <strong key={start} className="text-black dark:text-white">
               {short}
-            </strong>
+            </strong>,
           );
         } else {
           parts.push(full);
@@ -110,7 +109,6 @@ export default function Page() {
 
     return parts;
   }
-
 
   const send = async () => {
     if (!input.trim()) return;
@@ -132,7 +130,7 @@ export default function Page() {
         return;
       }
 
-      setLoadingRes(true)
+      setLoadingRes(true);
 
       const queryParams = new URLSearchParams({
         question: userMessage,
@@ -149,7 +147,7 @@ export default function Page() {
       const data = response.data;
       const assistantResponse = data.response || "";
 
-      setLoadingRes(false)
+      setLoadingRes(false);
 
       if (data.history_id) {
         if (!historyId) setHistoryId(data.history_id);
@@ -182,7 +180,7 @@ export default function Page() {
     } catch (err) {
       console.error("Error:", err);
       setLoading(false);
-      setLoadingRes(false)
+      setLoadingRes(false);
     }
   };
 
@@ -251,52 +249,49 @@ export default function Page() {
   };
 
   useEffect(() => {
-      const fetchUser = async () => {
-        const token = document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("token="))
-          ?.split("=")[1];
-  
-        if (!token) {
-          setLoadUser(false)
-          return
-        }
-        try {
-          const response = await getCurrentUser(token);
-          setUser(response.data);
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setLoadUser(false);
-        }
-      };
-  
-      fetchUser();
-    }, []);
-    
-    const homeMessages = [
-      "Hello {name}, how can I help you?",
-      "Welcome {name}! Ask about software or technology.",
-      "Hi {name}! I’m ready to help you find answers from our FAQ dataset.",
-      "Hey {name}! Ask a tech question?",
-      "Hello {name}! Explore our FAQ chatbot",
-      "Welcome {name}! Ask any technical question.",
-    ];
+    const fetchUser = async () => {
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("token="))
+        ?.split("=")[1];
 
-    const [welcomeMessage, setWelcomeMessage] = useState("");
-
-    useEffect(() => {
-      if (user) {
-        const msg =
-          homeMessages[Math.floor(Math.random() * homeMessages.length)]
-            .replace("{name}", user.name.split(" ")[0]);
-
-        setWelcomeMessage(msg);
+      if (!token) {
+        setLoadUser(false);
+        return;
       }
-    }, [user]);
+      try {
+        const response = await getCurrentUser(token);
+        setUser(response.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadUser(false);
+      }
+    };
 
-    
+    fetchUser();
+  }, []);
 
+  const homeMessages = [
+    "Hello {name}, how can I help you?",
+    "Welcome {name}! Ask about software or technology.",
+    "Hi {name}! I’m ready to help you find answers from our FAQ dataset.",
+    "Hey {name}! Ask a tech question?",
+    "Hello {name}! Explore our FAQ chatbot",
+    "Welcome {name}! Ask any technical question.",
+  ];
+
+  const [welcomeMessage, setWelcomeMessage] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      const msg = homeMessages[
+        Math.floor(Math.random() * homeMessages.length)
+      ].replace("{name}", user.name.split(" ")[0]);
+
+      setWelcomeMessage(msg);
+    }
+  }, [user]);
 
   return (
     <SidebarProvider>
@@ -342,14 +337,14 @@ export default function Page() {
             )}
 
             {!loading && !loadUser && messages.length === 0 && (
-              <h1 className="text-center lg:text-3xl text-2xl font-semibold 
+              <h1
+                className="text-center lg:text-3xl text-2xl font-semibold 
                   bg-linear-to-r from-blue-200 via-blue-500 to-blue-200 
-                            bg-clip-text text-transparent">
+                            bg-clip-text text-transparent"
+              >
                 {welcomeMessage}
               </h1>
-
             )}
-
 
             <div
               ref={chatRef}
@@ -368,17 +363,18 @@ export default function Page() {
                 </div>
               ))}
 
-              {
-                loadingRes && (
-                  <div
-                    className={`p-2 flex gap-1 items-center rounded-xl font-sans text-xl text-black/70 dark:text-white/70 animate-pulse`}
+              {loadingRes && (
+                <div
+                  className={`p-2 flex gap-1 items-center rounded-xl font-sans text-xl text-black/70 dark:text-white/70 animate-pulse`}
                   style={{ animationDuration: "1.3s" }}
-                  >
-                    <Loader2Icon className="animate-spin" style={{ animationDuration: "0.6s" }}/> <span>Wait a sec...</span>
-                  </div>
-                )
-              }
-
+                >
+                  <Loader2Icon
+                    className="animate-spin"
+                    style={{ animationDuration: "0.6s" }}
+                  />{" "}
+                  <span>Wait a sec...</span>
+                </div>
+              )}
 
               {streamText && (
                 <div className="p-2 rounded-xl text-xl font-sans dark:text-white/70 text-black/70">
