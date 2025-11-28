@@ -1,7 +1,9 @@
-# Tech FAQ Chatbot (all-MiniLM-L6-v2 Model)
+# Tech FAQ Chatbot (all-MiniLM-L6-v2, TF-IDF Models)
 
-This project implements a Question–Answer retrieval model using all-MiniLM-L6-v2 and Cosine Similarity.
+This project implements a Question–Answer retrieval models using all-MiniLM-L6-v2 & tf-idf and Cosine Similarity.
 Given a user’s question, the model finds the most semantically similar question from a dataset and returns the corresponding best-matching answer.
+
+<img width="2048" height="1032" alt="Screenshot from 2025-11-28 21-00-29" src="https://github.com/user-attachments/assets/494fb3ff-a910-4130-bcfc-bafee145e9e3" />
 
 ## How it works
 
