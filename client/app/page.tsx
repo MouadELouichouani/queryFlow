@@ -272,27 +272,6 @@ export default function Page() {
     fetchUser();
   }, []);
 
-  const homeMessages = [
-    "Hello {name}, how can I help you?",
-    "Welcome {name}! Ask about software or technology.",
-    "Hi {name}! I’m ready to help you find answers from our FAQ dataset.",
-    "Hey {name}! Ask a tech question?",
-    "Hello {name}! Explore our FAQ chatbot",
-    "Welcome {name}! Ask any technical question.",
-  ];
-
-  const [welcomeMessage, setWelcomeMessage] = useState("");
-
-  useEffect(() => {
-    if (user) {
-      const msg = homeMessages[
-        Math.floor(Math.random() * homeMessages.length)
-      ].replace("{name}", user.name.split(" ")[0]);
-
-      setWelcomeMessage(msg);
-    }
-  }, [user]);
-
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -336,13 +315,13 @@ export default function Page() {
               </div>
             )}
 
-            {!loading && !loadUser && messages.length === 0 && (
+            {!loading && !loadUser && user && messages.length === 0 && (
               <h1
                 className="text-center lg:text-3xl text-2xl font-semibold 
                   bg-linear-to-r from-blue-200 via-blue-500 to-blue-200 
                             bg-clip-text text-transparent"
               >
-                {welcomeMessage}
+                Hi {user?.name.split(" ")[0]}! ask any question related to tech
               </h1>
             )}
 
