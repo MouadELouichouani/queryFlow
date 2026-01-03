@@ -22,13 +22,15 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
-import { ArrowUp, Loader2Icon, LoaderIcon } from "lucide-react";
+import { ArrowUp, Loader2Icon, LoaderIcon, Mic, Mic2 } from "lucide-react";
 import { useState, useEffect, useRef, KeyboardEvent, JSX } from "react";
 import { useParams } from "next/navigation";
 import { ask } from "@/services/ask";
 import { getQueriesByHistory } from "@/services/history";
 import { User } from "@/types/user";
 import { getCurrentUser } from "@/services/auth";
+import { Button } from "@/components/ui/button";
+import AudioRecorderDialog from "@/components/audio-recording-dialog";
 
 type Message = {
   role: "user" | "assistant";
@@ -379,6 +381,11 @@ export default function Page() {
                 <DropdownMenu />
                 <InputGroupText className="ml-auto">52% used</InputGroupText>
                 <Separator orientation="vertical" />
+                <Button className="rounded-full cursor-pointer"
+                  size="icon-sm"
+                >
+                  <Mic />
+                </Button>
                 <InputGroupButton
                   variant="default"
                   className="rounded-full cursor-pointer"
@@ -395,6 +402,7 @@ export default function Page() {
                 </InputGroupButton>
               </InputGroupAddon>
             </InputGroup>
+            <AudioRecorderDialog />
 
             <p className="mt-2 dark:text-white/40 text-sm text-center text-black/40">
               queryFlow-v1
