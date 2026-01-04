@@ -1,14 +1,14 @@
 import os
 import uuid
 from flask import Blueprint, request, jsonify
-from controllers.transcribe_controller import transcribe_audio
+from controllers.stt_controller import transcribe_audio
 
-transcribe_bp = Blueprint("transcribe", __name__)
+stt_bp = Blueprint("transcribe", __name__)
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@transcribe_bp.route("/transcribe", methods=["POST"])
+@stt_bp.route("/transcribe", methods=["POST"])
 def transcribe():
     if "audio" not in request.files:
         return jsonify({"error": "No audio file provided"}), 400

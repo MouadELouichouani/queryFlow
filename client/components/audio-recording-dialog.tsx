@@ -78,7 +78,7 @@ export default function VoiceRecorderDialog({ sendTrn }: { sendTrn: (transcript:
       formData.append("audio", audioBlob, "voice.webm");
 
       try {
-        const res = await fetch("http://localhost:5000/api/transcribe", {
+        const res = await fetch("http://localhost:5000/api/stt/transcribe", {
           method: "POST",
           body: formData,
         });

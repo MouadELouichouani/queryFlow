@@ -6,7 +6,8 @@ from routes.auth import auth
 from routes.ask_route import askQue
 from routes.history import history
 from routes.query import query
-from routes.transcribe_routes import transcribe_bp
+from routes.stt_routes import stt_bp
+from routes.tts_routes import tts_bp
 CORS(
     app,
     supports_credentials=True,
@@ -14,7 +15,8 @@ CORS(
     allow_headers=["Content-Type", "Authorization"],
 )
 
-app.register_blueprint(transcribe_bp, url_prefix="/api")
+app.register_blueprint(stt_bp, url_prefix="/api/stt")
+app.register_blueprint(tts_bp, url_prefix="/api/tts")
 app.register_blueprint(auth, url_prefix="/api/auth")
 app.register_blueprint(askQue, url_prefix="/api/ask")
 app.register_blueprint(history, url_prefix="/api/history")
