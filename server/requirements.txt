@@ -74,7 +74,7 @@ sphinxcontrib-serializinghtml==2.0.0
 stevedore==5.4.0
 sympy==1.14.0
 threadpoolctl==3.6.0
-tokenizers==0.22.1
+tokenizers==0.22.2
 torch==2.9.1
 tqdm==4.67.1
 transformers==4.57.3
