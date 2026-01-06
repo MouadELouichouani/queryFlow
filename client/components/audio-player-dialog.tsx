@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Play, Pause, X, Volume2 } from "lucide-react";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Play, Pause, X, Volume2, RotateCcw } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
+import { cn } from "@/lib/utils";
 
 interface AudioPlayerDialogProps {
   text: string;
@@ -23,42 +23,8 @@ export default function AudioPlayerDialog({ text, open, onOpenChange }: AudioPla
   
   const audioRef = React.useRef<HTMLAudioElement | null>(null);
   const animationRef = React.useRef<number>(0);
-  const circlesRef = React.useRef<HTMLDivElement>(null);
 
-  // Generate animated circles
-  React.useEffect(() => {
-    if (!circlesRef.current || !open) return;
-
-    const container = circlesRef.current;
-    container.innerHTML = '';
-
-    const colors = [
-      'rgba(59, 130, 246, 0.3)',  // blue
-      'rgba(168, 85, 247, 0.3)',  // purple
-      'rgba(236, 72, 153, 0.3)',  // pink
-      'rgba(34, 197, 94, 0.3)',   // green
-    ];
-
-    for (let i = 0; i < 4; i++) {
-      const circle = document.createElement('div');
-      circle.className = 'absolute rounded-full animate-pulse';
-      circle.style.width = `${100 + i * 30}px`;
-      circle.style.height = `${100 + i * 30}px`;
-      circle.style.backgroundColor = colors[i];
-      circle.style.animationDelay = `${i * 0.2}s`;
-      circle.style.animationDuration = `${1.5 + i * 0.3}s`;
-      container.appendChild(circle);
-    }
-
-    // Add center circle
-    const centerCircle = document.createElement('div');
-    centerCircle.className = 'absolute rounded-full bg-gradient-to-br from-primary to-purple-600';
-    centerCircle.style.width = '80px';
-    centerCircle.style.height = '80px';
-    container.appendChild(centerCircle);
-  }, [open]);
-
-  // Initialize audio
+  // Initialize audio logic
   React.useEffect(() => {
     if (!text || !open) return;
 
@@ -78,9 +44,7 @@ export default function AudioPlayerDialog({ text, open, onOpenChange }: AudioPla
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         
-        if (audioRef.current) {
-          URL.revokeObjectURL(audioRef.current.src);
-        }
+        if (audioRef.current) URL.revokeObjectURL(audioRef.current.src);
 
         const audio = new Audio(url);
         audioRef.current = audio;
@@ -90,12 +54,16 @@ export default function AudioPlayerDialog({ text, open, onOpenChange }: AudioPla
           setIsLoading(false);
         };
 
+        audio.onended = () => {
+          setIsPlaying(false);
+          setCurrentTime(0);
+        };
+
         audio.onerror = () => {
           setAudioError("Failed to load audio");
           setIsLoading(false);
         };
       } catch (error) {
-        console.error("Error loading audio:", error);
         setAudioError("Failed to generate audio");
         setIsLoading(false);
       }
@@ -108,30 +76,23 @@ export default function AudioPlayerDialog({ text, open, onOpenChange }: AudioPla
         audioRef.current.pause();
         URL.revokeObjectURL(audioRef.current.src);
       }
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      cancelAnimationFrame(animationRef.current);
     };
   }, [text, open]);
 
-  // Animation loop for progress
   const updateProgress = React.useCallback(() => {
-    if (!audioRef.current || !isPlaying) return;
-
+    if (!audioRef.current) return;
     setCurrentTime(audioRef.current.currentTime);
     animationRef.current = requestAnimationFrame(updateProgress);
-  }, [isPlaying]);
+  }, []);
 
-  // Play/pause toggle
   const togglePlay = () => {
     if (!audioRef.current || isLoading) return;
 
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      cancelAnimationFrame(animationRef.current);
     } else {
       audioRef.current.play();
       setIsPlaying(true);
@@ -139,7 +100,6 @@ export default function AudioPlayerDialog({ text, open, onOpenChange }: AudioPla
     }
   };
 
-  // Handle slider change
   const handleTimeChange = (value: number[]) => {
     const newTime = value[0];
     if (audioRef.current) {
@@ -148,187 +108,170 @@ export default function AudioPlayerDialog({ text, open, onOpenChange }: AudioPla
     }
   };
 
-  // Handle volume change
-  const handleVolumeChange = (value: number[]) => {
-    const newVolume = value[0];
-    setVolume(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume / 100;
-    }
-  };
-
-  // Format time display
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Cleanup on close
-  const handleClose = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      URL.revokeObjectURL(audioRef.current.src);
-      audioRef.current = null;
-    }
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
-    setIsPlaying(false);
-    setCurrentTime(0);
-    onOpenChange(false);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden rounded-2xl border-0 shadow-2xl bg-gradient-to-b from-background to-secondary/10 backdrop-blur-sm">
-        {/* Header */}
-        <div className="relative p-6 border-b bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"></div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
-                <Volume2 className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <DialogTitle className="text-xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                  Audio Player
-                </DialogTitle>
-                <DialogDescription className="text-sm text-muted-foreground">
-                  Listening to response
-                </DialogDescription>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClose}
-              className="rounded-full hover:bg-primary/10"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[450px] p-0 bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 gap-0 overflow-hidden">
+        
+        {/* Header - Strictly B&W */}
+        <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-900">
+          <div className="flex items-center gap-2">
+            <Volume2 className="h-5 w-5" />
+            <DialogTitle className="text-lg font-semibold tracking-tight">Audio Preview</DialogTitle>
           </div>
+          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 rounded-full">
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
-        {/* Main Content */}
-        <div className="flex flex-col items-center p-8">
-          {/* Animated Circles */}
-          <div className="relative mb-8">
-            <div 
-              ref={circlesRef}
-              className="relative flex items-center justify-center h-60 w-60"
-            >
-              {/* Play/Pause Button */}
+        <div className="p-8 flex flex-col items-center">
+          {/* Animated Area */}
+          <div className="relative h-48 w-48 flex items-center justify-center mb-8">
+            {/* Colorful pulse rings - Only visible when playing */}
+            {isPlaying && !isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "absolute rounded-full border-2 opacity-0 animate-ping",
+                      i === 0 ? "border-blue-400" : i === 1 ? "border-purple-400" : "border-pink-400"
+                    )}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      animationDuration: `${2 + i}s`,
+                      animationDelay: `${i * 0.5}s`,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Center Circle Button */}
+            {/* Animated Area */}
+            <div className="relative h-64 w-64 flex items-center justify-center mb-4">
+              {/* Concentric Sound Waves (Visible only when playing) */}
+              {isPlaying && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {/* Wave 1 - Blueish */}
+                  <div className="absolute h-32 w-32 rounded-full bg-blue-400/20 animate-[ping_2s_linear_infinite]" />
+                  {/* Wave 2 - Purplish */}
+                  <div className="absolute h-32 w-32 rounded-full bg-purple-400/20 animate-[ping_2s_linear_infinite_0.5s]" />
+                  {/* Wave 3 - Pinkish */}
+                  <div className="absolute h-32 w-32 rounded-full bg-pink-400/20 animate-[ping_2s_linear_infinite_1s]" />
+                  
+                  {/* Static background glow to blend colors */}
+                  <div className="absolute h-40 w-40 rounded-full from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-2xl animate-pulse" />
+                </div>
+              )}
+
+              {/* Main Button */}
               <Button
                 onClick={togglePlay}
                 disabled={isLoading || !!audioError}
-                className="absolute w-16 h-16 rounded-full bg-white dark:bg-black shadow-2xl hover:scale-105 transition-all z-10"
+                size="icon"
+                className={cn(
+                  "relative h-28 w-28 rounded-full shadow-2xl transition-all duration-500 z-10 border-8",
+                  "border-white dark:border-zinc-950", // Thick border creates a "cutout" look
+                  isPlaying 
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-black scale-110 animate-pulse shadow-purple-500/20" 
+                    : "bg-zinc-100 text-zinc-900 dark:bg-zinc-900 dark:text-white scale-100",
+                  isLoading && "animate-pulse"
+                )}
               >
                 {isLoading ? (
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-t-transparent" />
                 ) : isPlaying ? (
-                  <Pause className="h-6 w-6 fill-current" />
+                  <div className="flex items-center gap-1">
+                    {/* Minimalist visualizer bars inside the button */}
+                    {/* <span className="w-1.5 h-6 bg-current rounded-full animate-[bounce_1s_infinite_0s]" />
+                    <span className="w-1.5 h-8 bg-current rounded-full animate-[bounce_1s_infinite_0.2s]" />
+                    <span className="w-1.5 h-6 bg-current rounded-full animate-[bounce_1s_infinite_0.4s]" /> */}
+                  </div>
                 ) : (
-                  <Play className="h-6 w-6 fill-current ml-0.5" />
+                  <Play className="h-10 w-10 fill-current ml-1.5" />
                 )}
               </Button>
             </div>
           </div>
 
-          {/* Loading or Error States */}
-          {isLoading && (
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center gap-2 text-primary">
-                <div className="h-3 w-3 animate-bounce rounded-full bg-primary" />
-                <div className="h-3 w-3 animate-bounce rounded-full bg-primary" style={{ animationDelay: '0.1s' }} />
-                <div className="h-3 w-3 animate-bounce rounded-full bg-primary" style={{ animationDelay: '0.2s' }} />
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Generating audio...
-              </p>
-            </div>
-          )}
-
-          {audioError && (
-            <div className="text-center mb-6">
-              <div className="h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-3">
-                <X className="h-6 w-6 text-red-500" />
-              </div>
-              <p className="text-red-500">{audioError}</p>
-            </div>
-          )}
-
-          {/* Text Preview */}
-          <div className="w-full mb-8">
-            <div className="text-sm font-medium text-muted-foreground mb-2">
-              Text Preview
-            </div>
-            <div className="bg-gradient-to-br from-primary/5 to-purple-500/5 rounded-xl p-4 border border-primary/10 max-h-32 overflow-y-auto">
-              <p className="text-sm leading-relaxed">
-                {text.length > 200 ? `${text.substring(0, 200)}...` : text}
-              </p>
-            </div>
+          {/* Text Summary */}
+          <div className="w-full border rounded-lg p-3 mb-6">
+             <p className="text-xs dark:text-white/60 text-black/60 italic">
+               "{text}"
+             </p>
           </div>
 
-          {/* Progress Bar */}
-          <div className="w-full space-y-4">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">{formatTime(currentTime)}</span>
-              <span className="font-medium">{formatTime(duration)}</span>
-            </div>
-            
-            <Slider
-              value={[currentTime]}
-              max={duration || 1}
-              step={0.1}
-              onValueChange={handleTimeChange}
-              className="w-full"
-              disabled={isLoading || !!audioError}
-            />
-
-            {/* Volume Control */}
-            <div className="flex items-center gap-3">
-              <Volume2 className="h-4 w-4 text-muted-foreground" />
+          {/* Controls - Monochrome Slider */}
+          <div className="w-full space-y-6">
+            <div className="space-y-2">
               <Slider
-                value={[volume]}
-                max={100}
-                step={1}
-                onValueChange={handleVolumeChange}
-                className="flex-1"
-                disabled={isLoading || !!audioError}
+                value={[currentTime]}
+                max={duration || 1}
+                step={0.1}
+                onValueChange={handleTimeChange}
+                disabled={isLoading}
+                className="cursor-pointer"
               />
-              <span className="text-sm text-muted-foreground min-w-[2.5rem]">
-                {volume}%
-              </span>
+              <div className="flex justify-between text-[10px] font-medium uppercase tracking-wider text-zinc-400">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
             </div>
-          </div>
 
-          {/* Controls */}
-          <div className="flex gap-3 mt-8">
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (audioRef.current) {
-                  audioRef.current.currentTime = 0;
-                  setCurrentTime(0);
-                }
-              }}
-              disabled={isLoading || !!audioError || !isPlaying}
-              className="rounded-full"
-            >
-              Restart
-            </Button>
-            
-            <Button
-              variant="default"
-              onClick={togglePlay}
-              disabled={isLoading || !!audioError}
-              className="rounded-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
-            >
-              {isPlaying ? 'Pause Audio' : 'Play Audio'}
-            </Button>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2 flex-1">
+                <Volume2 className="h-4 w-4 text-zinc-400" />
+                <Slider
+                  value={[volume]}
+                  max={100}
+                  step={1}
+                  onValueChange={(v) => {
+                    setVolume(v[0]);
+                    if (audioRef.current) audioRef.current.volume = v[0] / 100;
+                  }}
+                  className="w-24"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-full h-9 w-9 p-0"
+                  onClick={() => {
+                    if (audioRef.current) {
+                      audioRef.current.currentTime = 0;
+                      setCurrentTime(0);
+                    }
+                  }}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="rounded-full px-6 font-semibold"
+                  onClick={togglePlay}
+                >
+                  {isPlaying ? 'Pause' : 'Play'}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
+
+        {audioError && (
+          <div className="bg-red-50 dark:bg-red-950/20 p-3 text-center">
+            <p className="text-xs text-red-600 dark:text-red-400 font-medium">{audioError}</p>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
