@@ -39,7 +39,7 @@ packaging==25.0
 pandas==2.3.3
 pathspec==0.12.1
 pbr==7.0.3
-pillow==12.0.0
+pillow==12.1.0
 pip-tools==7.5.2
 platformdirs==4.5.0
 pycparser==2.23
