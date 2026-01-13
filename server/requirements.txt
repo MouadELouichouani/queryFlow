@@ -64,7 +64,7 @@ setuptools==80.9.0
 six==1.17.0
 smmap==5.0.2
 snowballstemmer==3.0.1
-Sphinx==9.0.4
+Sphinx==9.1.0
 sphinxcontrib-applehelp==2.0.0
 sphinxcontrib-devhelp==2.0.0
 sphinxcontrib-htmlhelp==2.1.0
