@@ -3,7 +3,7 @@ argcomplete==3.6.3
 attrs==25.4.0
 Authlib==1.6.6
 babel==2.17.0
-bandit==1.9.2
+bandit==1.9.3
 black==25.12.0
 blinker==1.9.0
 build==1.4.0
